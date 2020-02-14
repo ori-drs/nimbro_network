@@ -102,6 +102,9 @@ UDPClient::UDPClient()
 	XmlRpc::XmlRpcValue list;
 	m_nh.getParam("services", list);
 
+	std::string service_prefix;
+	m_nh.param("service_prefix", service_prefix, std::string());
+
 	ROS_ASSERT(list.getType() == XmlRpc::XmlRpcValue::TypeArray);
 
 	for(int32_t i = 0; i < list.size(); ++i)
@@ -121,7 +124,7 @@ UDPClient::UDPClient()
 		ops.helper = boost::make_shared<CallbackHelper>(name, this);
 		ops.req_datatype = ops.datatype + "Request";
 		ops.res_datatype = ops.datatype + "Response";
-		ops.service = name;
+		ops.service = "/" + service_prefix + "/" + name;
 
 		ROS_DEBUG("Advertising service '%s'", ops.service.c_str());
 

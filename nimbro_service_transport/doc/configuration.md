@@ -23,6 +23,9 @@ Required:
 Optional:
  - `timeout` (float): Timeout after which a service call is considered as failed
    (UDP only, default: 10.0)
+ - `service_prefix` (string): prepend service_prefix to names in the services
+   list. The server will receive the request at the service without the prefix
+   name.
 
 Service configuration
 ---------------------

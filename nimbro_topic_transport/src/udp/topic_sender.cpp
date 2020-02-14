@@ -28,7 +28,7 @@ extern "C"
 namespace nimbro_topic_transport
 {
 
-TopicSender::TopicSender(UDPSender* sender, ros::NodeHandle* nh, const std::string& topic, double rate, bool resend, int flags, bool enable, const std::string& type)
+TopicSender::TopicSender(UDPSender* sender, ros::NodeHandle* nh, const std::string& topic, double rate, bool resend, int flags, bool enable, const std::string& type, const std::string& prefix)
  : m_sender(sender)
  , m_flags(flags)
  , m_updateBuf(true)
@@ -41,7 +41,7 @@ TopicSender::TopicSender(UDPSender* sender, ros::NodeHandle* nh, const std::stri
 {
 	ros::SubscribeOptions ops;
 	boost::function<void(const topic_tools::ShapeShifter::ConstPtr&)> func = boost::bind(&TopicSender::handleData, this, _1);
-	ops.initByFullCallbackType(topic, 20, func);
+	ops.initByFullCallbackType("/" + prefix + "/" + topic, 20, func);
 
 	if(!type.empty())
 	{
@@ -51,6 +51,7 @@ TopicSender::TopicSender(UDPSender* sender, ros::NodeHandle* nh, const std::stri
 
 	m_subscriber = nh->subscribe(ops);
 	m_topicName = topic;
+	m_topicPrefix = prefix;
 
 	if(rate == 0.0)
 		m_durationBetweenPackets = ros::Duration(0.0);

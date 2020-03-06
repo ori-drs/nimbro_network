@@ -53,6 +53,9 @@ Optional:
    messages are to be sent to a topic both ways (always specify the name of the
    receiver belonging to the other sender). See `launch/bidirectional_topics.launch`
    for an example setup (TCP only)
+ - `topic_prefix` (string): prepend topic_prefix before subscribing to topics in
+   the topic list. The receiver side will have the topic published without the
+   prefix.
 
 Topic configuration
 -------------------

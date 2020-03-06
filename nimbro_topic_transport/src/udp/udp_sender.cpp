@@ -111,6 +111,9 @@ UDPSender::UDPSender()
 	XmlRpc::XmlRpcValue list;
 	nh.getParam("topics", list);
 
+	std::string topic_prefix;
+	 nh.param("topic_prefix", topic_prefix, std::string());
+
 	ROS_ASSERT(list.getType() == XmlRpc::XmlRpcValue::TypeArray);
 
 	for(int32_t i = 0; i < list.size(); ++i)
@@ -140,11 +143,7 @@ UDPSender::UDPSender()
 		if(list[i].hasMember("type"))
 			type = (std::string)(list[i]["type"]);
 
-		if(list[i].hasMember("latch"))
-			ROS_WARN_STREAM("Ignoring 'latch' flag at UDP topic " << ((std::string)list[i]["name"]).c_str() <<
-							" (UDP topics can't be latched).");
-
-		TopicSender* sender = new TopicSender(this, &nh, list[i]["name"], rate, resend, flags, enabled, type);
+		TopicSender* sender = new TopicSender(this, &nh, list[i]["name"], rate, resend, flags, enabled, type, topic_prefix);
 
 		if(m_relayMode)
 			sender->setDirectTransmissionEnabled(false);

@@ -64,8 +64,11 @@ TCPSender::TCPSender()
 	XmlRpc::XmlRpcValue list;
 	m_nh.getParam("topics", list);
 
-	ROS_ASSERT(list.getType() == XmlRpc::XmlRpcValue::TypeArray);
+	std::string topic_prefix;
+	m_nh.param("topic_prefix", topic_prefix, std::string());
 
+	ROS_ASSERT(list.getType() == XmlRpc::XmlRpcValue::TypeArray);
+	
 	for(int32_t i = 0; i < list.size(); ++i)
 	{
 		XmlRpc::XmlRpcValue& entry = list[i];
@@ -86,7 +89,7 @@ TCPSender::TCPSender()
 		func = boost::bind(&TCPSender::messageCallback, this, topic, flags, _1);
 
 		ros::SubscribeOptions options;
-		options.initByFullCallbackType<const ros::MessageEvent<topic_tools::ShapeShifter const>&>(topic, 20, func);
+		options.initByFullCallbackType<const ros::MessageEvent<topic_tools::ShapeShifter const>&>("/" + topic_prefix + "/" + topic, 20, func);
 
 		if(entry.hasMember("type"))
 		{

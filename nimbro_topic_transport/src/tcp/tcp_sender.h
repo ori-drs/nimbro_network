@@ -31,9 +31,11 @@ public:
 
 	bool connect();
 
-	void send(const std::string& topic, int flags, const topic_tools::ShapeShifter::ConstPtr& shifter);
 	void messageCallback(const std::string& topic, int flags,
-		const ros::MessageEvent<topic_tools::ShapeShifter const>& shifter);
+		const ros::MessageEvent<topic_tools::ShapeShifter const>& shifter, const bool reconnect = true);
+	void send(const std::string& topic, int flags, const topic_tools::ShapeShifter::ConstPtr& shifter,
+			  const bool reconnect = true);
+    void sendLatched();
 private:
 	void updateStats();
 
@@ -49,6 +51,8 @@ private:
 	std::vector<uint8_t> m_packet;
 	std::vector<uint8_t> m_compressionBuf;
 	std::vector<std::string> m_ignoredPubs;
+
+	std::map<std::string, std::pair<topic_tools::ShapeShifter::ConstPtr, int> > m_latchedMessages;
 
 #if WITH_CONFIG_SERVER
 	std::map<std::string, boost::shared_ptr<config_server::Parameter<bool>>> m_enableTopic;

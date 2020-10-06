@@ -143,6 +143,10 @@ UDPSender::UDPSender()
 		if(list[i].hasMember("type"))
 			type = (std::string)(list[i]["type"]);
 
+		if(list[i].hasMember("latch"))
+			ROS_WARN_STREAM("Ignoring 'latch' flag at UDP topic " << ((std::string)list[i]["name"]).c_str() <<
+							" (UDP topics can't be latched).");
+
 		TopicSender* sender = new TopicSender(this, &nh, list[i]["name"], rate, resend, flags, enabled, type, topic_prefix);
 
 		if(m_relayMode)

@@ -41,7 +41,11 @@ TopicSender::TopicSender(UDPSender* sender, ros::NodeHandle* nh, const std::stri
 {
 	ros::SubscribeOptions ops;
 	boost::function<void(const topic_tools::ShapeShifter::ConstPtr&)> func = boost::bind(&TopicSender::handleData, this, _1);
-	ops.initByFullCallbackType("/" + prefix + "/" + topic, 20, func);
+	std::string full_topic = topic;
+	if (!prefix.empty()) {
+		full_topic = "/" + prefix + "/" + topic;
+	}
+	ops.initByFullCallbackType(full_topic, 20, func);
 
 	if(!type.empty())
 	{

@@ -82,11 +82,16 @@ TCPSender::TCPSender()
 		if(entry.hasMember("compress") && ((bool)entry["compress"]) == true)
 			flags |= TCP_FLAG_COMPRESSED;
 
+		if (!entry.hasMember("use_prefix") || (entry.hasMember("use_prefix") && ((bool)entry["use_prefix"]))) {
+		    // The config does not specify prefix requirement, or explicitly says it should be prefixed
+			topic = "/" + topic_prefix + "/" + topic;
+		}
+
 		boost::function<void(const ros::MessageEvent<topic_tools::ShapeShifter const>&)> func;
 		func = boost::bind(&TCPSender::messageCallback, this, topic, flags, _1);
 
 		ros::SubscribeOptions options;
-		options.initByFullCallbackType<const ros::MessageEvent<topic_tools::ShapeShifter const>&>("/" + topic_prefix + "/" + topic, 20, func);
+		options.initByFullCallbackType<const ros::MessageEvent<topic_tools::ShapeShifter const>&>(topic, 20, func);
 
 		if(entry.hasMember("type"))
 		{

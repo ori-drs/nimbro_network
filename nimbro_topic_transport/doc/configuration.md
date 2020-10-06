@@ -75,3 +75,5 @@ parameter is `name`.
  - `resend`: If the sender does not get a message 1.0/`rate` after the last one,
    it will re-send the last received one. (UDP only)
  - `compress`: If true, compress the data on the wire with bz2.
+ - `use_prefix`: If false, does not use the global `topic_prefix` set in the
+   node parameters for this topic.

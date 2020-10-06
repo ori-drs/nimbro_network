@@ -139,6 +139,12 @@ UDPSender::UDPSender()
 		if(list[i].hasMember("enable") && (!(bool)list[i]["enable"]))
 			enabled = false;
 
+		std::string prefix_actual = topic_prefix;
+		if(list[i].hasMember("use_prefix") && (!(bool)list[i]["use_prefix"])) {
+			// Config file specifies to ignore the prefix, set it to empty
+			prefix_actual = "";
+		}
+
 		std::string type;
 		if(list[i].hasMember("type"))
 			type = (std::string)(list[i]["type"]);
@@ -147,7 +153,7 @@ UDPSender::UDPSender()
 			ROS_WARN_STREAM("Ignoring 'latch' flag at UDP topic " << ((std::string)list[i]["name"]).c_str() <<
 							" (UDP topics can't be latched).");
 
-		TopicSender* sender = new TopicSender(this, &nh, list[i]["name"], rate, resend, flags, enabled, type, topic_prefix);
+		TopicSender* sender = new TopicSender(this, &nh, list[i]["name"], rate, resend, flags, enabled, type, prefix_actual);
 
 		if(m_relayMode)
 			sender->setDirectTransmissionEnabled(false);

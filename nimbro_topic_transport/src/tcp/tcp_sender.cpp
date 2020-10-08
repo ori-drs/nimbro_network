@@ -3,6 +3,7 @@
 
 #include "tcp_sender.h"
 #include "../topic_info.h"
+#include <limits>
 
 #include <bzlib.h>
 
@@ -352,8 +353,19 @@ void TCPSender::send(const std::string& topic, int flags, const topic_tools::Sha
 	);
 
 	// Try to send the packet
-	for(int tries = 0; tries < 10; ++tries)
+	int try_limit = 10;
+	if (flags & TCP_FLAG_LATCHED) {
+		// If this is a latched topic we don't want to send anything until the
+		// other side can receive it otherwise it will never be sent
+		try_limit = std::numeric_limits<int>::max();
+	}
+
+	for(int tries = 0; tries < try_limit; ++tries)
 	{
+		if (tries >= 1 && flags & TCP_FLAG_LATCHED) {
+			ROS_INFO("Failed to send latched topic %s. Will keep trying...", topic.c_str());
+			sleep(2);
+		}
 		if(m_fd == -1)
 		{
 			if(reconnect && !connect())

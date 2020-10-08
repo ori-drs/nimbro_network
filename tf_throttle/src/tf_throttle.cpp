@@ -12,7 +12,7 @@
 boost::scoped_ptr<tf::TransformListener> g_tf;
 ros::Publisher pub;
 
-void sendTransforms()
+void sendTransforms(std::string valid_namespace)
 {
 	std::vector<std::string> frames;
 	g_tf->getFrameStrings(frames);
@@ -27,6 +27,14 @@ void sendTransforms()
 		std::string parentFrame;
 		if(!g_tf->getParent(frame, ros::Time(0), parentFrame))
 			continue;
+
+		// If there is a namespace specified from which we will send frames, and
+		// neither the parent nor the child frame contains it, then skip this
+		// frame.
+		if (!valid_namespace.empty() && (frame.find(valid_namespace) == std::string::npos || parentFrame.find(valid_namespace) == std::string::npos)) {
+			ROS_DEBUG("Skipping frame %s with parent %s because neither frame is in the valid namespace %s.", frame.c_str(), parentFrame.c_str(), valid_namespace.c_str());
+			continue;
+		}
 
 		tf::StampedTransform transform;
 		try
@@ -61,11 +69,21 @@ int main(int argc, char** argv)
 	g_tf.reset(new tf::TransformListener(nh, ros::Duration(10.0)));
 
 	double rate;
-	nh.param("rate", rate, 4.0);
+	nh.param<double>("rate", rate, 4.0);
 
+	std::string valid_namespace;
+	// If this parameter is set, this node will only republish frames for which
+	// either parent or child contain this string
+	nh.param<std::string>("valid_namespace", valid_namespace, "");
+	if (!valid_namespace.empty()) {
+		ROS_INFO("Will only republish frames which contain %s", valid_namespace.c_str());
+	} else {
+		ROS_INFO("Will republish all frames.");
+	}
+	
 	ros::Timer timer = nh.createTimer(
 		ros::Duration(1.0 / rate),
-		boost::bind(&sendTransforms)
+		boost::bind(&sendTransforms, valid_namespace)
 	);
 	pub = nh.advertise<tf2_msgs::TFMessage>("tf", 1);
 
